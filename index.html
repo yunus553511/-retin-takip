@@ -171,7 +171,7 @@
         }
         
         tr:hover {
-            background-color: rgba(57, 255, 20, 0.1);
+            background-color: rgba(57, 255, 20, 0.05);
             transform: scale(1.01);
         }
         
@@ -378,8 +378,9 @@
             }
             
             /* Satırlara hover efekti */
-            tr:hover td {
+            tr:hover {
                 background-color: rgba(57, 255, 20, 0.05);
+                transform: scale(1.01);
             }
             
             /* PC için tooltip'i mobilde gizle */
@@ -697,8 +698,14 @@
             const oldPopups = document.querySelectorAll('.data-popup');
             oldPopups.forEach(popup => popup.remove());
             
+            console.log('Sonuçlar yükleniyor:', searchResults.length);
+            
+            // Tüm popup'lar için bir dizi oluştur
+            const popups = [];
+            
             searchResults.forEach((row, i) => {
                 const tr = document.createElement('tr');
+                tr.setAttribute('data-row-index', i);
                 
                 // TARİH
                 const tdTarih = document.createElement('td');
@@ -755,6 +762,7 @@
                 const dataPopup = document.createElement('div');
                 dataPopup.className = 'data-popup';
                 dataPopup.id = `popup-${i}`; // Benzersiz ID
+                popups.push(dataPopup); // Popup'ı diziye ekle
                 
                 // Kapatma düğmesi ekle
                 const closeButton = document.createElement('button');
@@ -876,37 +884,38 @@
                 
                 // Popup içeriğini popup'a ekle
                 dataPopup.appendChild(popupContent);
-                document.body.appendChild(dataPopup); // Body'ye ekle (pozisyon için)
                 
                 // Satıra tıklama olayı ekle
-                tr.addEventListener('click', function(event) {
+                tr.onclick = function() {
+                    console.log('Satıra tıklandı, popup açılıyor:', i);
+                    
                     // Tüm popup'ları gizle
-                    const allPopups = document.querySelectorAll('.data-popup');
-                    allPopups.forEach(p => p.style.display = 'none');
+                    popups.forEach(p => p.style.display = 'none');
                     
                     // Bu satırın popup'unu göster
                     dataPopup.style.display = 'block';
                     
                     // Dışarıya tıklama ile kapatma olayını ekle
+                    function closePopupOutside(e) {
+                        if (!dataPopup.contains(e.target) && e.target !== tr) {
+                            dataPopup.style.display = 'none';
+                            document.removeEventListener('click', closePopupOutside);
+                        }
+                    }
+                    
+                    // Bir sonraki tıklamada çalışması için timeout ekle
                     setTimeout(() => {
                         document.addEventListener('click', closePopupOutside);
                     }, 10);
-                    
-                    // Olayın yayılmasını durdur
-                    event.stopPropagation();
-                });
-                
-                // Popup dışına tıklama ile kapatma fonksiyonu
-                function closePopupOutside(e) {
-                    if (!dataPopup.contains(e.target) && e.target !== tr) {
-                        dataPopup.style.display = 'none';
-                        document.removeEventListener('click', closePopupOutside);
-                    }
-                }
+                };
                 
                 resultsBody.appendChild(tr);
             });
             
+            // Tüm popup'ları body'ye ekle
+            popups.forEach(popup => document.body.appendChild(popup));
+            
+            // Sonuçları göster
             results.style.display = 'block';
             
             // Animasyon efekti için
@@ -935,20 +944,16 @@
             driveFrame.src = '';
         });
         
-        // Tooltip'i kapatmak için fonksiyon
-        function closeTooltip(e) {
-            // Tıklanan eleman tooltip içinde değilse kapat
-            if (!e.target.closest('.tooltip-touch')) {
-                const tooltips = document.querySelectorAll('.tooltip-touch');
-                tooltips.forEach(t => t.style.display = 'none');
-                document.removeEventListener('touchstart', closeTooltip);
-            }
-        }
-        
-        // Ekran dönüşümünde tooltip'leri gizle
+        // Ekran dönüşümünde popup'ları gizle
         window.addEventListener('orientationchange', function() {
-            const tooltips = document.querySelectorAll('.tooltip-touch');
-            tooltips.forEach(t => t.style.display = 'none');
+            const popups = document.querySelectorAll('.data-popup');
+            popups.forEach(p => p.style.display = 'none');
+        });
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tıklama olaylarını test et
+            console.log('Sayfa yüklendi, tıklama olayları hazır');
         });
     </script>
 </body>
