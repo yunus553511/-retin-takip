@@ -312,10 +312,14 @@
                 overflow: visible; /* Tarih metnini göster */
                 white-space: normal; /* Metni sarabilir */
                 word-break: break-word; /* Uzun kelimeleri bölebilir */
+                position: relative; /* Tooltip için gerekli */
             }
             
             th {
                 font-size: 11px;
+                white-space: normal; /* Başlıklarda kelimeler alta inebilir */
+                word-break: break-word;
+                hyphens: auto;
             }
             
             /* Tablo başlıklarının görünümünü iyileştir */
@@ -367,78 +371,102 @@
             td, th {
                 min-width: 80px;
             }
+            
+            /* Tooltip stili - mobil için */
+            tr:hover .tooltip,
+            tr:active .tooltip {
+                display: none; /* Hover'da gösterme (mobil için) */
+            }
+            
+            /* Uzun basılı tutma için tooltip */
+            tr .tooltip-touch {
+                display: none;
+                position: absolute;
+                top: -120px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.9);
+                color: #39ff14;
+                border: 2px solid #39ff14;
+                border-radius: 8px;
+                padding: 15px;
+                z-index: 100;
+                width: 250px;
+                box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+                text-align: left;
+                font-size: 14px;
+                backdrop-filter: blur(5px);
+                animation: glow 1.5s infinite alternate;
+            }
+            
+            /* Tooltip üçgen oku */
+            tr .tooltip-touch:after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-width: 10px 10px 0;
+                border-style: solid;
+                border-color: #39ff14 transparent transparent transparent;
+            }
         }
         
-        /* Daha küçük mobil cihazlar için ek düzenlemeler */
-        @media (max-width: 480px) {
-            body {
-                padding: 5px 2px;
+        /* PC için tooltip stili */
+        @media (min-width: 769px) {
+            tr {
+                position: relative;
             }
             
-            th, td {
-                padding: 2px 2px;
-                font-size: 9px;
-                letter-spacing: 0.6px;
+            tr .tooltip {
+                display: none;
+                position: absolute;
+                top: -100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.9);
+                color: #39ff14;
+                border: 2px solid #39ff14;
+                border-radius: 8px;
+                padding: 12px;
+                z-index: 100;
+                width: 300px;
+                box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+                text-align: left;
+                font-size: 14px;
+                backdrop-filter: blur(5px);
+                animation: glow 1.5s infinite alternate;
             }
             
-            h1 {
-                font-size: 18px;
-                margin-bottom: 10px;
+            /* Tooltip üçgen oku */
+            tr .tooltip:after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-width: 10px 10px 0;
+                border-style: solid;
+                border-color: #39ff14 transparent transparent transparent;
             }
             
-            .search-box {
-                padding: 8px;
-                max-width: 98%;
+            tr:hover .tooltip {
+                display: block;
             }
             
-            input[type="text"], button {
-                font-size: 11px;
-                padding: 6px;
+            /* PC'de uzun basılı tutma tooltipini gösterme */
+            tr .tooltip-touch {
+                display: none;
             }
-            
-            .results {
-                padding: 3px 1px;
-                max-width: 100%;
+        }
+        
+        /* Tooltip parlama animasyonu */
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
             }
-            
-            /* Daha kompakt tablo */
-            th:first-child, td:first-child {
-                min-width: 40px;
-                max-width: 40px;
-                width: 40px;
-                letter-spacing: 0.7px;
-            }
-            
-            th:nth-child(2), td:nth-child(2) {
-                min-width: 50px;
-                max-width: 50px;
-                width: 50px;
-                letter-spacing: 0.7px;
-            }
-            
-            th:nth-child(3), td:nth-child(3),
-            th:nth-child(4), td:nth-child(4),
-            th:nth-child(5), td:nth-child(5),
-            th:nth-child(6), td:nth-child(6),
-            th:nth-child(7), td:nth-child(7) {
-                min-width: 30px;
-                max-width: 30px;
-                width: 30px;
-            }
-            
-            /* Notlar sütununu genişlet */
-            th:nth-child(8), td:nth-child(8) {
-                min-width: 70px;
-                max-width: 70px;
-                width: 70px;
-            }
-            
-            /* Tablo başlıklarının boyutunu küçült */
-            th {
-                font-size: 8px;
-                padding-top: 3px;
-                padding-bottom: 3px;
-                letter-spacing: 0.6px;
+            to {
+                box-shadow: 0 0 20px rgba(57, 255, 20, 0.8);
             }
         }
     </style>
@@ -667,6 +695,53 @@
                 }
                 tdNotlar.textContent = notlarText;
                 tr.appendChild(tdNotlar);
+                
+                // Tooltip div'i oluştur (PC için hover)
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.innerHTML = `<strong>Tarih:</strong> ${formatExcelDate(row[0])}<br>
+                                  <strong>Profil Kodu:</strong> ${row[1] || ''}<br>
+                                  <strong>1 Metrelik Profil Ağırlığı:</strong> ${row[2] || ''}<br>
+                                  <strong>Sipariş Boyu:</strong> ${row[3] || ''}<br>
+                                  <strong>Üretlenen Profil Miktarı:</strong> ${row[4] || ''}<br>
+                                  <strong>Pres Hızı:</strong> ${row[5] || ''}<br>
+                                  <strong>Sortiden Alınan Profil Miktarı:</strong> ${row[6] || ''}<br>
+                                  <strong>Notlar:</strong> ${row[12] || ''}`;
+                tr.appendChild(tooltip);
+                
+                // Tooltip-touch div'i oluştur (mobil için uzun basılı tutma)
+                const tooltipTouch = document.createElement('div');
+                tooltipTouch.className = 'tooltip-touch';
+                tooltipTouch.innerHTML = `<strong>Tarih:</strong> ${formatExcelDate(row[0])}<br>
+                                       <strong>Profil Kodu:</strong> ${row[1] || ''}<br>
+                                       <strong>1 Metrelik Profil Ağırlığı:</strong> ${row[2] || ''}<br>
+                                       <strong>Sipariş Boyu:</strong> ${row[3] || ''}<br>
+                                       <strong>Üretlenen Profil Miktarı:</strong> ${row[4] || ''}<br>
+                                       <strong>Pres Hızı:</strong> ${row[5] || ''}<br>
+                                       <strong>Sortiden Alınan Profil Miktarı:</strong> ${row[6] || ''}<br>
+                                       <strong>Notlar:</strong> ${row[12] || ''}`;
+                tr.appendChild(tooltipTouch);
+                
+                // Mobil için uzun basılı tutma olayını ekle
+                tr.addEventListener('touchstart', function(e) {
+                    this.touchTimeout = setTimeout(() => {
+                        const tooltips = document.querySelectorAll('.tooltip-touch');
+                        tooltips.forEach(t => t.style.display = 'none');
+                        this.querySelector('.tooltip-touch').style.display = 'block';
+                    }, 500);
+                });
+                
+                tr.addEventListener('touchend', function() {
+                    clearTimeout(this.touchTimeout);
+                    setTimeout(() => {
+                        const tooltips = document.querySelectorAll('.tooltip-touch');
+                        tooltips.forEach(t => t.style.display = 'none');
+                    }, 1000);
+                });
+                
+                tr.addEventListener('touchmove', function() {
+                    clearTimeout(this.touchTimeout);
+                });
                 
                 resultsBody.appendChild(tr);
             });
