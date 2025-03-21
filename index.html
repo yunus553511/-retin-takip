@@ -306,22 +306,30 @@
                 margin-bottom: 10px;
             }
             
-            th, td {
-                padding: 4px 6px;
-                font-size: 11px;
-                overflow: visible; /* Tarih metnini göster */
-                white-space: nowrap; /* Metni tek satırda tut */
-                text-overflow: ellipsis; /* Tarih metnini ... ile göster */
-                position: relative; /* Tooltip için gerekli */
-                max-width: 120px; /* Maksimum genişlik */
+            /* Tablo ve hücreler için temel ayarlar */
+            table {
+                table-layout: fixed;
+                width: 100%;
+                border-spacing: 2px; /* Hücreler arası boşluk */
+                border-collapse: separate;
             }
             
+            th, td {
+                padding: 6px 4px;
+                font-size: 12px;
+                overflow: hidden; /* Taşmalı metni gizle */
+                text-overflow: ellipsis; /* Taşmalı metni ... ile göster */
+                position: relative; /* Tooltip için gerekli */
+            }
+            
+            /* Başlıklar için ayarlar */
             th {
-                font-size: 10px;
+                font-size: 11px;
                 white-space: normal; /* Başlıklarda kelimeler alta inebilir */
                 word-break: break-word;
                 hyphens: auto;
-                padding: 4px 2px;
+                padding: 6px 2px;
+                text-align: center;
             }
             
             /* Tablo başlıklarının görünümünü iyileştir */
@@ -338,68 +346,77 @@
                 -webkit-overflow-scrolling: touch;
             }
             
-            /* Minimum sütun genişliğini ayarla */
-            table {
-                table-layout: fixed;
-                width: 100%;
-                border-spacing: 1px; /* Hücreler arasında boşluk */
-                border-collapse: separate;
-            }
-            
-            /* Tarih sütunu için daha fazla alan ayır */
+            /* Tarih sütunu için ayarlar */
             td:first-child, th:first-child {
-                min-width: 85px; /* Tarih sütunu için daha fazla alan */
-                max-width: 85px;
+                min-width: 90px;
+                max-width: 90px;
                 white-space: nowrap; /* Tarihi tek satırda tut */
             }
             
             /* Profil kodu sütunu için ayarlar */
             td:nth-child(2), th:nth-child(2) {
-                min-width: 80px; /* Profil kodu sütunu için alan */
-                max-width: 80px;
+                min-width: 85px;
+                max-width: 85px;
                 white-space: nowrap; /* Profil kodunu tek satırda tut */
-                padding-left: 8px; /* Sol taraftan daha fazla boşluk */
+                padding-left: 10px; /* Sol taraftan daha fazla boşluk */
             }
             
-            /* Notlar sütunu için daha fazla alan ayır */
+            /* Notlar sütunu için ayarlar */
             td:last-child, th:last-child {
-                min-width: 120px;
+                min-width: 130px;
                 max-width: 150px;
                 white-space: normal; /* Notlar sütununda metni sarabilir */
                 word-break: break-word;
             }
             
             /* Diğer sütunlar için */
-            td, th {
-                min-width: 60px;
+            td:nth-child(n+3):not(:last-child), th:nth-child(n+3):not(:last-child) {
+                min-width: 70px;
+                max-width: 70px;
+                text-align: center;
             }
             
-            /* Tooltip stili - mobil için */
+            /* PC için tooltip'i mobilde gizle */
             tr:hover .tooltip,
             tr:active .tooltip {
-                display: none; /* Hover'da gösterme (mobil için) */
+                display: none;
             }
             
-            /* Uzun basılı tutma için tooltip */
+            /* Mobil için uzun basılı tutma tooltip'i */
             tr .tooltip-touch {
                 display: none;
-                position: fixed; /* Sabit pozisyon */
-                top: 50%; /* Ekranın ortası */
-                left: 50%; /* Ekranın ortası */
-                transform: translate(-50%, -50%); /* Tam ortalamaya */
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
                 background-color: rgba(0, 0, 0, 0.95);
                 color: #39ff14;
                 border: 2px solid #39ff14;
                 border-radius: 8px;
-                padding: 12px;
-                z-index: 1000; /* En üst katman */
-                width: 80%; /* Ekran genişliğinin %80'i */
-                max-width: 300px;
+                padding: 15px;
+                z-index: 1000;
+                width: 85%;
+                max-width: 320px;
                 box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
                 text-align: left;
-                font-size: 13px;
+                font-size: 14px;
+                line-height: 1.5;
                 backdrop-filter: blur(5px);
                 animation: glow 1.5s infinite alternate;
+            }
+            
+            /* Tooltip içindeki bilgilerin düzenlenmesi için */
+            tr .tooltip-touch strong {
+                display: inline-block;
+                min-width: 160px;
+                margin-right: 10px;
+            }
+            
+            /* Tooltip içindeki her bilgi satırı arasında boşluk */
+            tr .tooltip-touch br {
+                margin-bottom: 8px;
+                content: "";
+                display: block;
             }
         }
         
@@ -705,20 +722,25 @@
                 tooltipTouch.className = 'tooltip-touch';
                 tooltipTouch.innerHTML = `<strong>Tarih:</strong> ${formatExcelDate(row[0])}<br>
                                        <strong>Profil Kodu:</strong> ${row[1] || ''}<br>
-                                       <strong>1 Metrelik Profil Ağırlığı:</strong> ${row[2] || ''}<br>
-                                       <strong>Sipariş Boyu:</strong> ${row[3] || ''}<br>
-                                       <strong>Üretlenen Profil Miktarı:</strong> ${row[4] || ''}<br>
-                                       <strong>Pres Hızı:</strong> ${row[5] || ''}<br>
-                                       <strong>Sortiden Alınan Profil Miktarı:</strong> ${row[6] || ''}<br>
-                                       <strong>Notlar:</strong> ${row[12] || ''}`;
+                                       <strong>Metal Kalınlığı:</strong> ${row[2] || ''} mm<br>
+                                       <strong>Sipariş Boyu:</strong> ${row[3] || ''} mm<br>
+                                       <strong>Üretim Miktarı:</strong> ${row[4] || ''}<br>
+                                       <strong>Profil Hızı:</strong> ${row[5] || ''}<br>
+                                       <strong>Sortiden Alma Miktarı:</strong> ${row[6] || ''}<br>
+                                       <strong>Depo Miktarı:</strong> ${row[7] || ''}<br>
+                                       <strong>Notlar:</strong> ${row[12] || ''}`;  // 12. indeks (M sütunu) notlar için
                 tr.appendChild(tooltipTouch);
                 
                 // Mobil için uzun basılı tutma olayını ekle
+                let touchStartTime = 0;
+                let touchTimeout = null;
+                
                 tr.addEventListener('touchstart', function(e) {
-                    this.touchTimeout = setTimeout(() => {
+                    touchStartTime = new Date().getTime();
+                    touchTimeout = setTimeout(() => {
                         // Tüm tooltip'leri gizle
-                        const tooltips = document.querySelectorAll('.tooltip-touch');
-                        tooltips.forEach(t => t.style.display = 'none');
+                        const allTooltips = document.querySelectorAll('.tooltip-touch');
+                        allTooltips.forEach(t => t.style.display = 'none');
                         
                         // Bu satırın tooltip'ini göster
                         const tooltip = this.querySelector('.tooltip-touch');
@@ -728,15 +750,21 @@
                             // Arka plan kapatma olayını ekle
                             document.addEventListener('touchstart', closeTooltip);
                         }
-                    }, 500);
+                    }, 500); // 500ms uzun basılı tutma süresi
                 });
                 
                 tr.addEventListener('touchend', function() {
-                    clearTimeout(this.touchTimeout);
+                    const touchEndTime = new Date().getTime();
+                    const touchDuration = touchEndTime - touchStartTime;
+                    
+                    // Eğer dokunma süresi 500ms'den kısa ise normal tıklama olarak kabul et
+                    if (touchDuration < 500) {
+                        clearTimeout(touchTimeout);
+                    }
                 });
                 
                 tr.addEventListener('touchmove', function() {
-                    clearTimeout(this.touchTimeout);
+                    clearTimeout(touchTimeout);
                 });
                 
                 resultsBody.appendChild(tr);
@@ -779,6 +807,12 @@
                 document.removeEventListener('touchstart', closeTooltip);
             }
         }
+        
+        // Ekran dönüşümünde tooltip'leri gizle
+        window.addEventListener('orientationchange', function() {
+            const tooltips = document.querySelectorAll('.tooltip-touch');
+            tooltips.forEach(t => t.style.display = 'none');
+        });
     </script>
 </body>
 </html>
