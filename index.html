@@ -307,15 +307,16 @@
             }
             
             th, td {
-                padding: 8px 10px;
-                font-size: 14px;
-                /* Mobilde üst üste gelmeyi önlemek için */
-                white-space: normal;
-                word-break: break-word;
+                padding: 6px 8px;
+                font-size: 12px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 120px;
             }
             
             th {
-                font-size: 12px;
+                font-size: 11px;
             }
             
             /* Tablo başlıklarını daha iyi görünür yap */
@@ -334,102 +335,21 @@
             
             /* Minimum sütun genişliği ayarla */
             table {
-                table-layout: auto;
-            }
-            
-            td, th {
-                min-width: 100px; /* Minimum sütun genişliği */
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            input[type="text"], button {
-                font-size: 14px;
-                padding: 10px;
-            }
-            
-            th, td {
-                padding: 3px 2px;
-                font-size: 10px;
-                white-space: normal; /* Alt satıra geçmesine izin ver */
-                letter-spacing: 0.5px; /* Harfler arasını boşluk */
-            }
-            
-            /* Tablo başlıklarını yatay olarak düzenle */
-            th {
-                vertical-align: top;
-                text-align: center;
-                height: auto;
-                padding-top: 5px;
-                padding-bottom: 5px;
-                word-break: break-word; /* Uzun kelimeleri alt satıra geçir */
-                hyphens: auto; /* Gerekirse kelimeleri heceleme için */
-                letter-spacing: 0.7px; /* Başlıklarda harfler arasını boşluk */
-            }
-            
-            .results {
-                padding: 5px 2px;
-                max-width: 99%;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            
-            table {
-                font-size: 10px;
-                width: 100%;
                 table-layout: fixed;
-                border-spacing: 1px; /* Hücreler arasını boşluk */
-                border-collapse: separate;
+                width: 100%;
             }
             
-            /* Tablo için yatay kaydırma */
-            .results {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+            /* Notlar sütununu için daha fazla alan ayır */
+            td:last-child, th:last-child {
+                min-width: 150px;
+                max-width: 200px;
+                white-space: normal;
+                word-break: break-word;
             }
             
-            /* Sütun genişliklerini ayarlama */
-            th, td {
-                overflow: visible; /* İçeriğin tamamını göstermek için */
-                text-overflow: clip;
-            }
-            
-            /* Tarih sütununun genişliğini sabit tut */
-            th:first-child, td:first-child {
-                min-width: 45px;
-                max-width: 45px;
-                width: 45px;
-                letter-spacing: 0.8px; /* Tarih sütununda harfler arasını boşluk */
-            }
-            
-            /* Profil kodu sütununun genişliğini sabit tut */
-            th:nth-child(2), td:nth-child(2) {
-                min-width: 55px;
-                max-width: 55px;
-                width: 55px;
-                letter-spacing: 0.8px; /* Profil kodu sütununda harfler arasını boşluk */
-            }
-            
-            /* Diğer sütunları daha kompakt hale getir */
-            th:nth-child(3), td:nth-child(3),
-            th:nth-child(4), td:nth-child(4),
-            th:nth-child(5), td:nth-child(5),
-            th:nth-child(6), td:nth-child(6),
-            th:nth-child(7), td:nth-child(7) {
-                min-width: 35px;
-                max-width: 35px;
-                width: 35px;
-            }
-            
-            /* Notlar sütununu genişlet */
-            th:nth-child(8), td:nth-child(8) {
+            /* Diğer sütunları için */
+            td, th {
                 min-width: 80px;
-                max-width: 80px;
-                width: 80px;
-                white-space: normal; /* Alt satıra geçmesine izin ver */
-                word-break: break-word; /* Uzun kelimeleri alt satıra geçir */
             }
         }
         
@@ -442,7 +362,7 @@
             th, td {
                 padding: 2px 2px;
                 font-size: 9px;
-                letter-spacing: 0.6px; /* Harfler arasını boşluk */
+                letter-spacing: 0.6px;
             }
             
             h1 {
@@ -470,14 +390,14 @@
                 min-width: 40px;
                 max-width: 40px;
                 width: 40px;
-                letter-spacing: 0.7px; /* Tarih sütununda harfler arasını boşluk */
+                letter-spacing: 0.7px;
             }
             
             th:nth-child(2), td:nth-child(2) {
                 min-width: 50px;
                 max-width: 50px;
                 width: 50px;
-                letter-spacing: 0.7px; /* Profil kodu sütununda harfler arasını boşluk */
+                letter-spacing: 0.7px;
             }
             
             th:nth-child(3), td:nth-child(3),
@@ -502,7 +422,7 @@
                 font-size: 8px;
                 padding-top: 3px;
                 padding-bottom: 3px;
-                letter-spacing: 0.6px; /* Başlıklarda harfler arasını boşluk */
+                letter-spacing: 0.6px;
             }
         }
     </style>
@@ -607,7 +527,6 @@
                     }
                     
                     loading.style.display = 'none';
-                    successMessage.style.display = 'block';
                     console.log('Excel verisi yüklendi');
                 })
                 .catch(error => {
@@ -636,7 +555,8 @@
                 displayResults(searchResults);
                 loading.style.display = 'none';
                 if (searchResults.length > 0) {
-                    successMessage.style.display = 'block';
+                    successMessage.style.display = 'block'; // Mesajı göster
+                    results.style.display = 'block';
                 }
             }, 500);
         }
