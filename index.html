@@ -307,20 +307,37 @@
             }
             
             th, td {
-                padding: 4px 2px;
-                font-size: 11px;
+                padding: 3px 1px;
+                font-size: 10px;
+                white-space: nowrap;
+            }
+            
+            /* Tablo başlıklarını dikey olarak düzenle */
+            th {
+                height: 80px;
+                vertical-align: bottom;
+                text-align: center;
+                position: relative;
+            }
+            
+            th span {
+                transform: rotate(-90deg);
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 5px;
                 white-space: nowrap;
             }
             
             .results {
-                padding: 8px 5px;
-                max-width: 98%;
+                padding: 5px 2px;
+                max-width: 99%;
                 margin-left: auto;
                 margin-right: auto;
             }
             
             table {
-                font-size: 11px;
+                font-size: 10px;
                 width: 100%;
                 table-layout: fixed;
             }
@@ -337,18 +354,18 @@
                 text-overflow: ellipsis;
             }
             
-            /* Tarih sütununu sabit genişlikte tutma */
+            /* Tarih sütununun genişliğini azalt */
             th:first-child, td:first-child {
-                min-width: 60px;
-                max-width: 60px;
-                width: 60px;
+                min-width: 40px;
+                max-width: 40px;
+                width: 40px;
             }
             
-            /* Profil kodu sütununu sabit genişlikte tutma */
+            /* Profil kodu sütununun genişliğini ayarlama */
             th:nth-child(2), td:nth-child(2) {
-                min-width: 70px;
-                max-width: 70px;
-                width: 70px;
+                min-width: 50px;
+                max-width: 50px;
+                width: 50px;
             }
             
             /* Diğer sütunları daha kompakt hale getirme */
@@ -358,54 +375,54 @@
             th:nth-child(6), td:nth-child(6),
             th:nth-child(7), td:nth-child(7),
             th:nth-child(8), td:nth-child(8) {
-                min-width: 50px;
-                max-width: 50px;
-                width: 50px;
+                min-width: 35px;
+                max-width: 35px;
+                width: 35px;
             }
         }
         
         /* Daha küçük mobil cihazlar için ek düzenlemeler */
         @media (max-width: 480px) {
             body {
-                padding: 10px 5px;
+                padding: 5px 2px;
             }
             
             th, td {
-                padding: 3px 2px;
-                font-size: 10px;
+                padding: 2px 1px;
+                font-size: 9px;
             }
             
             h1 {
-                font-size: 20px;
-                margin-bottom: 15px;
+                font-size: 18px;
+                margin-bottom: 10px;
             }
             
             .search-box {
-                padding: 10px;
-                max-width: 95%;
+                padding: 8px;
+                max-width: 98%;
             }
             
             input[type="text"], button {
-                font-size: 12px;
-                padding: 8px;
+                font-size: 11px;
+                padding: 6px;
             }
             
             .results {
-                padding: 5px 3px;
-                max-width: 99%;
+                padding: 3px 1px;
+                max-width: 100%;
             }
             
             /* Daha kompakt tablo */
             th:first-child, td:first-child {
-                min-width: 55px;
-                max-width: 55px;
-                width: 55px;
+                min-width: 35px;
+                max-width: 35px;
+                width: 35px;
             }
             
             th:nth-child(2), td:nth-child(2) {
-                min-width: 65px;
-                max-width: 65px;
-                width: 65px;
+                min-width: 45px;
+                max-width: 45px;
+                width: 45px;
             }
             
             th:nth-child(3), td:nth-child(3),
@@ -414,14 +431,19 @@
             th:nth-child(6), td:nth-child(6),
             th:nth-child(7), td:nth-child(7),
             th:nth-child(8), td:nth-child(8) {
-                min-width: 45px;
-                max-width: 45px;
-                width: 45px;
+                min-width: 30px;
+                max-width: 30px;
+                width: 30px;
             }
             
             /* Tablo başlıklarının boyutunu küçültme */
             th {
-                font-size: 9px;
+                font-size: 8px;
+                height: 70px;
+            }
+            
+            th span {
+                bottom: 3px;
             }
         }
     </style>
@@ -450,14 +472,14 @@
             <table id="resultsTable">
                 <thead>
                     <tr>
-                        <th>TARİH</th>
-                        <th>PROFİL KODU</th>
-                        <th>1 METRELİK PROFİL AĞIRLIĞI</th>
-                        <th>SİPARİŞ BOYU</th>
-                        <th>ÜRETİLEN PROFİL MİKTARI</th>
-                        <th>PRES HIZI</th>
-                        <th>SORTİDEN ALINAN PROFİL MİKTARI</th>
-                        <th>NOTLAR</th>
+                        <th><span>TARİH</span></th>
+                        <th><span>PROFİL KODU</span></th>
+                        <th><span>1 METRELİK PROFİL AĞIRLIĞI</span></th>
+                        <th><span>SİPARİŞ BOYU</span></th>
+                        <th><span>ÜRETİLEN PROFİL MİKTARI</span></th>
+                        <th><span>PRES HIZI</span></th>
+                        <th><span>SORTİDEN ALINAN PROFİL MİKTARI</span></th>
+                        <th><span>NOTLAR</span></th>
                     </tr>
                 </thead>
                 <tbody id="resultsBody"></tbody>
