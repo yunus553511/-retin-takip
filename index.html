@@ -336,6 +336,8 @@
             table {
                 table-layout: fixed;
                 width: 100%;
+                border-spacing: 5px; /* Hücreler arasında boşluk */
+                border-collapse: separate;
             }
             
             /* Tarih sütunu için daha fazla alan ayır */
@@ -343,6 +345,14 @@
                 min-width: 90px; /* Tarih sütunu için daha fazla alan */
                 max-width: 90px;
                 white-space: nowrap; /* Tarihi tek satırda tut */
+            }
+            
+            /* Profil kodu sütunu için ayarlar */
+            td:nth-child(2), th:nth-child(2) {
+                min-width: 80px; /* Profil kodu sütunu için alan */
+                max-width: 80px;
+                white-space: nowrap; /* Profil kodunu tek satırda tut */
+                padding-left: 15px; /* Sol taraftan daha fazla boşluk */
             }
             
             /* Notlar sütunu için daha fazla alan ayır */
