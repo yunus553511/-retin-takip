@@ -310,26 +310,28 @@
             table {
                 table-layout: fixed;
                 width: 100%;
-                border-spacing: 2px; /* Hücreler arası boşluk */
+                border-spacing: 3px; /* Hücreler arası boşluk */
                 border-collapse: separate;
             }
             
             th, td {
-                padding: 6px 4px;
-                font-size: 12px;
+                padding: 8px 4px;
+                font-size: 13px;
                 overflow: hidden; /* Taşmalı metni gizle */
                 text-overflow: ellipsis; /* Taşmalı metni ... ile göster */
                 position: relative; /* Tooltip için gerekli */
+                border: 1px solid rgba(57, 255, 20, 0.3); /* Hücre sınırları daha belirgin */
             }
             
             /* Başlıklar için ayarlar */
             th {
-                font-size: 11px;
+                font-size: 12px;
                 white-space: normal; /* Başlıklarda kelimeler alta inebilir */
                 word-break: break-word;
                 hyphens: auto;
-                padding: 6px 2px;
+                padding: 8px 2px;
                 text-align: center;
+                background-color: rgba(57, 255, 20, 0.1); /* Başlık arka planı */
             }
             
             /* Tablo başlıklarının görünümünü iyileştir */
@@ -344,19 +346,20 @@
             .results {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                padding-bottom: 20px; /* Alt tarafta fazladan boşluk */
             }
             
             /* Tarih sütunu için ayarlar */
             td:first-child, th:first-child {
-                min-width: 90px;
-                max-width: 90px;
+                min-width: 100px;
+                max-width: 100px;
                 white-space: nowrap; /* Tarihi tek satırda tut */
             }
             
             /* Profil kodu sütunu için ayarlar */
             td:nth-child(2), th:nth-child(2) {
-                min-width: 85px;
-                max-width: 85px;
+                min-width: 90px;
+                max-width: 90px;
                 white-space: nowrap; /* Profil kodunu tek satırda tut */
                 padding-left: 10px; /* Sol taraftan daha fazla boşluk */
             }
@@ -371,9 +374,15 @@
             
             /* Diğer sütunlar için */
             td:nth-child(n+3):not(:last-child), th:nth-child(n+3):not(:last-child) {
-                min-width: 70px;
-                max-width: 70px;
+                min-width: 75px;
+                max-width: 75px;
                 text-align: center;
+                white-space: nowrap; /* Sayısal değerler tek satırda */
+            }
+            
+            /* Satırlara hover efekti */
+            tr:hover td {
+                background-color: rgba(57, 255, 20, 0.05);
             }
             
             /* PC için tooltip'i mobilde gizle */
@@ -383,7 +392,7 @@
             }
             
             /* Mobil için uzun basılı tutma tooltip'i */
-            tr .tooltip-touch {
+            .tooltip-touch {
                 display: none;
                 position: fixed;
                 top: 50%;
@@ -395,28 +404,37 @@
                 border-radius: 8px;
                 padding: 15px;
                 z-index: 1000;
-                width: 85%;
-                max-width: 320px;
+                width: 90%;
+                max-width: 350px;
                 box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
                 text-align: left;
                 font-size: 14px;
-                line-height: 1.5;
+                line-height: 1.6;
                 backdrop-filter: blur(5px);
                 animation: glow 1.5s infinite alternate;
             }
             
-            /* Tooltip içindeki bilgilerin düzenlenmesi için */
-            tr .tooltip-touch strong {
-                display: inline-block;
-                min-width: 160px;
-                margin-right: 10px;
+            /* Tooltip içeriği için tablo stili */
+            .tooltip-content {
+                display: table;
+                width: 100%;
             }
             
-            /* Tooltip içindeki her bilgi satırı arasında boşluk */
-            tr .tooltip-touch br {
-                margin-bottom: 8px;
-                content: "";
-                display: block;
+            .tooltip-row {
+                display: table-row;
+            }
+            
+            .tooltip-label {
+                display: table-cell;
+                font-weight: bold;
+                padding-right: 10px;
+                padding-bottom: 8px;
+                min-width: 140px;
+            }
+            
+            .tooltip-value {
+                display: table-cell;
+                padding-bottom: 8px;
             }
         }
         
@@ -704,52 +722,142 @@
                 tdNotlar.textContent = notlarText;
                 tr.appendChild(tdNotlar);
                 
-                // Tooltip div'i oluştur (PC için hover)
-                const tooltip = document.createElement('div');
-                tooltip.className = 'tooltip';
-                tooltip.innerHTML = `<strong>Tarih:</strong> ${formatExcelDate(row[0])}<br>
-                                  <strong>Profil Kodu:</strong> ${row[1] || ''}<br>
-                                  <strong>1 Metrelik Profil Ağırlığı:</strong> ${row[2] || ''}<br>
-                                  <strong>Sipariş Boyu:</strong> ${row[3] || ''}<br>
-                                  <strong>Üretlenen Profil Miktarı:</strong> ${row[4] || ''}<br>
-                                  <strong>Pres Hızı:</strong> ${row[5] || ''}<br>
-                                  <strong>Sortiden Alınan Profil Miktarı:</strong> ${row[6] || ''}<br>
-                                  <strong>Notlar:</strong> ${row[12] || ''}`;
-                tr.appendChild(tooltip);
-                
                 // Tooltip-touch div'i oluştur (mobil için uzun basılı tutma)
                 const tooltipTouch = document.createElement('div');
                 tooltipTouch.className = 'tooltip-touch';
-                tooltipTouch.innerHTML = `<strong>Tarih:</strong> ${formatExcelDate(row[0])}<br>
-                                       <strong>Profil Kodu:</strong> ${row[1] || ''}<br>
-                                       <strong>Metal Kalınlığı:</strong> ${row[2] || ''} mm<br>
-                                       <strong>Sipariş Boyu:</strong> ${row[3] || ''} mm<br>
-                                       <strong>Üretim Miktarı:</strong> ${row[4] || ''}<br>
-                                       <strong>Profil Hızı:</strong> ${row[5] || ''}<br>
-                                       <strong>Sortiden Alma Miktarı:</strong> ${row[6] || ''}<br>
-                                       <strong>Depo Miktarı:</strong> ${row[7] || ''}<br>
-                                       <strong>Notlar:</strong> ${row[12] || ''}`;  // 12. indeks (M sütunu) notlar için
-                tr.appendChild(tooltipTouch);
+                
+                // Tooltip içeriğini tablo formatında oluştur
+                const tooltipContent = document.createElement('div');
+                tooltipContent.className = 'tooltip-content';
+                
+                // Tarih satırı
+                const rowTarih = document.createElement('div');
+                rowTarih.className = 'tooltip-row';
+                const labelTarih = document.createElement('div');
+                labelTarih.className = 'tooltip-label';
+                labelTarih.textContent = 'Tarih:';
+                const valueTarih = document.createElement('div');
+                valueTarih.className = 'tooltip-value';
+                valueTarih.textContent = formatExcelDate(row[0]) || '-';
+                rowTarih.appendChild(labelTarih);
+                rowTarih.appendChild(valueTarih);
+                tooltipContent.appendChild(rowTarih);
+                
+                // Profil Kodu satırı
+                const rowKod = document.createElement('div');
+                rowKod.className = 'tooltip-row';
+                const labelKod = document.createElement('div');
+                labelKod.className = 'tooltip-label';
+                labelKod.textContent = 'Profil Kodu:';
+                const valueKod = document.createElement('div');
+                valueKod.className = 'tooltip-value';
+                valueKod.textContent = row[1] || '-';
+                rowKod.appendChild(labelKod);
+                rowKod.appendChild(valueKod);
+                tooltipContent.appendChild(rowKod);
+                
+                // Metal Kalınlığı satırı
+                const rowKalinlik = document.createElement('div');
+                rowKalinlik.className = 'tooltip-row';
+                const labelKalinlik = document.createElement('div');
+                labelKalinlik.className = 'tooltip-label';
+                labelKalinlik.textContent = 'Metal Kalınlığı:';
+                const valueKalinlik = document.createElement('div');
+                valueKalinlik.className = 'tooltip-value';
+                valueKalinlik.textContent = (row[2] ? row[2] + ' mm' : '-');
+                rowKalinlik.appendChild(labelKalinlik);
+                rowKalinlik.appendChild(valueKalinlik);
+                tooltipContent.appendChild(rowKalinlik);
+                
+                // Sipariş Boyu satırı
+                const rowBoy = document.createElement('div');
+                rowBoy.className = 'tooltip-row';
+                const labelBoy = document.createElement('div');
+                labelBoy.className = 'tooltip-label';
+                labelBoy.textContent = 'Sipariş Boyu:';
+                const valueBoy = document.createElement('div');
+                valueBoy.className = 'tooltip-value';
+                valueBoy.textContent = (row[3] ? row[3] + ' mm' : '-');
+                rowBoy.appendChild(labelBoy);
+                rowBoy.appendChild(valueBoy);
+                tooltipContent.appendChild(rowBoy);
+                
+                // Üretim Miktarı satırı
+                const rowUretim = document.createElement('div');
+                rowUretim.className = 'tooltip-row';
+                const labelUretim = document.createElement('div');
+                labelUretim.className = 'tooltip-label';
+                labelUretim.textContent = 'Üretim Miktarı:';
+                const valueUretim = document.createElement('div');
+                valueUretim.className = 'tooltip-value';
+                valueUretim.textContent = row[4] || '-';
+                rowUretim.appendChild(labelUretim);
+                rowUretim.appendChild(valueUretim);
+                tooltipContent.appendChild(rowUretim);
+                
+                // Profil Hızı satırı
+                const rowHiz = document.createElement('div');
+                rowHiz.className = 'tooltip-row';
+                const labelHiz = document.createElement('div');
+                labelHiz.className = 'tooltip-label';
+                labelHiz.textContent = 'Profil Hızı:';
+                const valueHiz = document.createElement('div');
+                valueHiz.className = 'tooltip-value';
+                valueHiz.textContent = row[5] || '-';
+                rowHiz.appendChild(labelHiz);
+                rowHiz.appendChild(valueHiz);
+                tooltipContent.appendChild(rowHiz);
+                
+                // Sortiden Alınan Miktar satırı
+                const rowSorti = document.createElement('div');
+                rowSorti.className = 'tooltip-row';
+                const labelSorti = document.createElement('div');
+                labelSorti.className = 'tooltip-label';
+                labelSorti.textContent = 'Sortiden Alınan:';
+                const valueSorti = document.createElement('div');
+                valueSorti.className = 'tooltip-value';
+                valueSorti.textContent = row[6] || '-';
+                rowSorti.appendChild(labelSorti);
+                rowSorti.appendChild(valueSorti);
+                tooltipContent.appendChild(rowSorti);
+                
+                // Notlar satırı
+                const rowNotlar = document.createElement('div');
+                rowNotlar.className = 'tooltip-row';
+                const labelNotlar = document.createElement('div');
+                labelNotlar.className = 'tooltip-label';
+                labelNotlar.textContent = 'Notlar:';
+                const valueNotlar = document.createElement('div');
+                valueNotlar.className = 'tooltip-value';
+                valueNotlar.textContent = row[12] || '-';
+                rowNotlar.appendChild(labelNotlar);
+                rowNotlar.appendChild(valueNotlar);
+                tooltipContent.appendChild(rowNotlar);
+                
+                // Tooltip içeriğini tooltip'e ekle
+                tooltipTouch.appendChild(tooltipContent);
+                document.body.appendChild(tooltipTouch); // Body'ye ekle (pozisyon için)
                 
                 // Mobil için uzun basılı tutma olayını ekle
                 let touchStartTime = 0;
                 let touchTimeout = null;
+                let activeTooltip = null;
                 
                 tr.addEventListener('touchstart', function(e) {
                     touchStartTime = new Date().getTime();
+                    const currentRow = this;
+                    
                     touchTimeout = setTimeout(() => {
                         // Tüm tooltip'leri gizle
                         const allTooltips = document.querySelectorAll('.tooltip-touch');
                         allTooltips.forEach(t => t.style.display = 'none');
                         
-                        // Bu satırın tooltip'ini göster
-                        const tooltip = this.querySelector('.tooltip-touch');
-                        if (tooltip) {
-                            tooltip.style.display = 'block';
-                            
-                            // Arka plan kapatma olayını ekle
-                            document.addEventListener('touchstart', closeTooltip);
-                        }
+                        // Tooltip'i göster
+                        tooltipTouch.style.display = 'block';
+                        activeTooltip = tooltipTouch;
+                        
+                        // Arka plan kapatma olayını ekle
+                        document.addEventListener('touchstart', closeTooltip);
                     }, 500); // 500ms uzun basılı tutma süresi
                 });
                 
@@ -757,7 +865,7 @@
                     const touchEndTime = new Date().getTime();
                     const touchDuration = touchEndTime - touchStartTime;
                     
-                    // Eğer dokunma süresi 500ms'den kısa ise normal tıklama olarak kabul et
+                    // Eğer dokunma süresi 500ms'den kısaysa normal tıklama olarak kabul et
                     if (touchDuration < 500) {
                         clearTimeout(touchTimeout);
                     }
