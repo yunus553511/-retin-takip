@@ -439,7 +439,7 @@
     
     <script>
         // Excel dosyası URL'i
-        const EXCEL_URL = 'https://docs.google.com/spreadsheets/d/1VfNZtHNrDuECCMaJiIlXXOD4MGIQcyuq/export?format=xlsx&gid=237221860';
+        const EXCEL_URL = 'https://docs.google.com/spreadsheets/d/1VfNZtHNrDuECCMaJiIlXXOD4MGIQcyuq/export?format=xlsx&gid=237221860&access_token=public';
         const loading = document.getElementById('loading');
         const results = document.getElementById('results');
         const searchButton = document.getElementById('searchButton');
@@ -488,7 +488,7 @@
                 .catch(error => {
                     console.error('Hata:', error);
                     loading.style.display = 'none';
-                    alert('Excel dosyası yüklürken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+                    alert('Excel dosyası yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
                 });
         }
         
