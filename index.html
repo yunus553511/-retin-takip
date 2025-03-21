@@ -307,9 +307,10 @@
             }
             
             th, td {
-                padding: 3px 1px;
+                padding: 3px 2px;
                 font-size: 10px;
                 white-space: normal; /* Alt satıra geçmesine izin ver */
+                letter-spacing: 0.5px; /* Harfler arasını boşluk */
             }
             
             /* Tablo başlıklarını yatay olarak düzenle */
@@ -321,6 +322,7 @@
                 padding-bottom: 5px;
                 word-break: break-word; /* Uzun kelimeleri alt satıra geçir */
                 hyphens: auto; /* Gerekirse kelimeleri heceleme için */
+                letter-spacing: 0.7px; /* Başlıklarda harfler arasını boşluk */
             }
             
             .results {
@@ -334,6 +336,8 @@
                 font-size: 10px;
                 width: 100%;
                 table-layout: fixed;
+                border-spacing: 1px; /* Hücreler arasını boşluk */
+                border-collapse: separate;
             }
             
             /* Tablo için yatay kaydırma */
@@ -350,16 +354,18 @@
             
             /* Tarih sütununun genişliğini sabit tut */
             th:first-child, td:first-child {
-                min-width: 40px;
-                max-width: 40px;
-                width: 40px;
+                min-width: 45px;
+                max-width: 45px;
+                width: 45px;
+                letter-spacing: 0.8px; /* Tarih sütununda harfler arasını boşluk */
             }
             
             /* Profil kodu sütununun genişliğini sabit tut */
             th:nth-child(2), td:nth-child(2) {
-                min-width: 50px;
-                max-width: 50px;
-                width: 50px;
+                min-width: 55px;
+                max-width: 55px;
+                width: 55px;
+                letter-spacing: 0.8px; /* Profil kodu sütununda harfler arasını boşluk */
             }
             
             /* Diğer sütunları daha kompakt hale getir */
@@ -390,8 +396,9 @@
             }
             
             th, td {
-                padding: 2px 1px;
+                padding: 2px 2px;
                 font-size: 9px;
+                letter-spacing: 0.6px; /* Harfler arasını boşluk */
             }
             
             h1 {
@@ -416,15 +423,17 @@
             
             /* Daha kompakt tablo */
             th:first-child, td:first-child {
-                min-width: 35px;
-                max-width: 35px;
-                width: 35px;
+                min-width: 40px;
+                max-width: 40px;
+                width: 40px;
+                letter-spacing: 0.7px; /* Tarih sütununda harfler arasını boşluk */
             }
             
             th:nth-child(2), td:nth-child(2) {
-                min-width: 45px;
-                max-width: 45px;
-                width: 45px;
+                min-width: 50px;
+                max-width: 50px;
+                width: 50px;
+                letter-spacing: 0.7px; /* Profil kodu sütununda harfler arasını boşluk */
             }
             
             th:nth-child(3), td:nth-child(3),
@@ -449,6 +458,7 @@
                 font-size: 8px;
                 padding-top: 3px;
                 padding-bottom: 3px;
+                letter-spacing: 0.6px; /* Başlıklarda harfler arasını boşluk */
             }
         }
     </style>
