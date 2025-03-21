@@ -20,13 +20,13 @@
         </div>
     </div>
     
-    <div class="loading" id="loading">
-        YÜKLENİYOR
-    </div>
+    <div class="loading" id="loading" style="display: none;">Lütfen yüklenmesini bekleyiniz...</div>
     
     <div class="no-results" id="noResults">
         SONUÇ BULUNAMADI.
     </div>
+    
+    <div id="successMessage" style="color: #00ffcc; text-align: center; margin-bottom: 15px; display: none;">Kullanıma hazır, iyi çalışmalar!</div>
     
     <div class="metal-border">
         <div class="results" id="results">
@@ -64,185 +64,171 @@
     <script>
         // Excel dosyası URL'i
         const EXCEL_URL = 'https://docs.google.com/spreadsheets/d/1VfNZtHNrDuECCMaJiIlXXOD4MGIQcyuq/export?format=xlsx&gid=237221860&access_token=public';
+        
+        // DOM elementlerini seç
         const loading = document.getElementById('loading');
+        const error = document.getElementById('noResults');
         const results = document.getElementById('results');
-        const searchButton = document.getElementById('searchButton');
-        const kalipNo = document.getElementById('kalipNo');
-        const noResults = document.getElementById('noResults');
+        const resultsTable = document.getElementById('resultsTable');
+        const searchInput = document.getElementById('kalipNo');
+        const successMessage = document.getElementById('successMessage');
         
-        let excelData = [];
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            loading.style.display = 'block';
-            downloadExcel();
-        });
-        
-        searchButton.addEventListener('click', performSearch);
-        
-        kalipNo.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
-        });
-        
-        // Excel dosyasını indir ve işle
-        function downloadExcel() {
-            fetch(EXCEL_URL)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Excel dosyası indirilemedi');
-                    }
-                    return response.arrayBuffer();
-                })
-                .then(data => {
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-                    
-                    // Başlık satırını kaldır
-                    if (excelData.length > 0) {
-                        excelData.shift();
-                    }
-                    
-                    loading.style.display = 'none';
-                    console.log('Excel verisi yüklendi');
-                })
-                .catch(error => {
-                    console.error('Hata:', error);
-                    loading.style.display = 'none';
-                    alert('Excel dosyası yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
-                });
+        // Excel tarih formatını düzeltme fonksiyonu
+        function formatExcelDate(excelDate) {
+            const date = new Date((excelDate - 25569) * 86400 * 1000);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
         }
         
-        // Arama fonksiyonu
-        function performSearch() {
-            const searchTerm = kalipNo.value.trim().toUpperCase();
+        // Excel dosyasını yükle
+        async function loadExcel() {
+            try {
+                loading.style.display = 'block';
+                error.style.display = 'none';
+                results.style.display = 'none';
+                successMessage.style.display = 'none';
+                
+                const response = await fetch(EXCEL_URL);
+                if (!response.ok) {
+                    throw new Error('Excel dosyası indirilemedi.');
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // İlk sayfayı al
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // JSON'a dönüştür
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                // Başlık satırını al
+                const headers = jsonData[0];
+                
+                // Veriyi işle
+                const excelData = [];
+                for (let i = 1; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+                    if (row.length > 0) {
+                        const rowData = {};
+                        for (let j = 0; j < headers.length; j++) {
+                            // Tarih sütununu düzelt (ilk sütun)
+                            if (j === 0 && typeof row[j] === 'number') {
+                                rowData[headers[j]] = formatExcelDate(row[j]);
+                            } else {
+                                rowData[headers[j]] = row[j] || '';
+                            }
+                        }
+                        excelData.push(rowData);
+                    }
+                }
+                
+                // Tabloyu oluştur
+                createTable(headers, excelData);
+                
+                loading.style.display = 'none';
+                results.style.display = 'block';
+                successMessage.style.display = 'block';
+                
+                // Arama kutusunu etkinleştir
+                searchInput.disabled = false;
+                
+                return excelData;
+            } catch (err) {
+                console.error('Excel yükleme hatası:', err);
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = 'Excel dosyası yüklenirken bir hata oluştu: ' + err.message;
+                return [];
+            }
+        }
+        
+        // Tabloyu oluştur
+        function createTable(headers, data) {
+            // Tabloyu temizle
+            resultsTable.innerHTML = '';
             
-            if (searchTerm === '') {
-                alert('Lütfen bir profil kodu girin');
+            // Başlık satırını oluştur
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            resultsTable.appendChild(thead);
+            
+            // Tablo gövdesini oluştur
+            const tbody = document.createElement('tbody');
+            
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header] || '';
+                    tr.appendChild(td);
+                });
+                
+                tbody.appendChild(tr);
+            });
+            
+            resultsTable.appendChild(tbody);
+        }
+        
+        // Excel'de arama yap
+        function searchExcel() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            if (!searchTerm) {
+                alert('Lütfen bir arama terimi girin');
                 return;
             }
             
             loading.style.display = 'block';
             results.style.display = 'none';
-            noResults.style.display = 'none';
+            error.style.display = 'none';
+            successMessage.style.display = 'none';
             
             setTimeout(() => {
-                const searchResults = searchExcelData(searchTerm);
-                displayResults(searchResults);
+                const filteredData = window.excelData.filter(row => {
+                    return Object.values(row).some(value => {
+                        return String(value).toLowerCase().includes(searchTerm);
+                    });
+                });
+                
+                if (filteredData.length > 0) {
+                    createTable(Object.keys(window.excelData[0]), filteredData);
+                    results.style.display = 'block';
+                    successMessage.style.display = 'block';
+                } else {
+                    error.style.display = 'block';
+                    error.textContent = `"${searchTerm}" için sonuç bulunamadı`;
+                }
+                
                 loading.style.display = 'none';
             }, 500);
         }
         
-        // Excel verisinde arama yap
-        function searchExcelData(searchTerm) {
-            if (!excelData || excelData.length === 0) {
-                return [];
+        // Enter tuşu ile arama yapma
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchExcel();
             }
-            
-            return excelData.filter(row => {
-                if (!row || row.length < 2) return false;
-                
-                const profilKoduCell = String(row[1] || '').toUpperCase();
-                return profilKoduCell.includes(searchTerm);
-            });
-        }
+        });
         
-        // Excel tarihini normal tarihe çevir
-        function formatExcelDate(excelDate) {
-            if (!excelDate) return '';
-            
-            // Excel tarihi (1 Ocak 1900'den itibaren geçen gün sayısı)
-            const date = new Date((excelDate - 25569) * 86400 * 1000);
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
-            
-            return `${day}.${month}.${year}`;
-        }
+        // Sayfa yüklendiğinde Excel'i yükle
+        window.onload = async function() {
+            searchInput.disabled = true; // Yükleme tamamlanana kadar devre dışı bırak
+            window.excelData = await loadExcel();
+        };
         
-        // Sonuçları göster
-        function displayResults(searchResults) {
-            const resultsBody = document.getElementById('resultsBody');
-            resultsBody.innerHTML = '';
-            
-            if (searchResults.length === 0) {
-                noResults.style.display = 'block';
-                return;
-            }
-            
-            searchResults.forEach(row => {
-                const tr = document.createElement('tr');
-                
-                // TARİH
-                const tdTarih = document.createElement('td');
-                tdTarih.textContent = formatExcelDate(row[0]) || '';
-                tr.appendChild(tdTarih);
-                
-                // PROFİL KODU
-                const tdKod = document.createElement('td');
-                tdKod.textContent = row[1] || '';
-                tr.appendChild(tdKod);
-                
-                // 1 METRELİK PROFİL AĞIRLIĞI
-                const tdAgirlik = document.createElement('td');
-                tdAgirlik.textContent = row[2] || '';
-                tr.appendChild(tdAgirlik);
-                
-                // SİPARİŞ BOYU
-                const tdSiparisBoy = document.createElement('td');
-                tdSiparisBoy.textContent = row[3] || '';
-                tr.appendChild(tdSiparisBoy);
-                
-                // ÜRETİLEN PROFİL MİKTARI
-                const tdUretilenMiktar = document.createElement('td');
-                tdUretilenMiktar.textContent = row[4] || '';
-                tr.appendChild(tdUretilenMiktar);
-                
-                // PRES HIZI
-                const tdPresHizi = document.createElement('td');
-                tdPresHizi.textContent = row[5] || '';
-                tr.appendChild(tdPresHizi);
-                
-                // SORTİDEN ALINAN PROFİL MİKTARI
-                const tdSortidenAlinanMiktar = document.createElement('td');
-                tdSortidenAlinanMiktar.textContent = row[6] || '';
-                tr.appendChild(tdSortidenAlinanMiktar);
-                
-                // NOTLAR (M sütunu - 12. index)
-                const tdNotlar = document.createElement('td');
-                let notlarText = row[12] || '-';
-                if (notlarText && !isNaN(notlarText)) {
-                    const inchValue = parseInt(notlarText);
-                    if (inchValue >= 5 && inchValue <= 6) {
-                        notlarText = '5 inch';
-                    } else if (inchValue >= 7 && inchValue <= 8) {
-                        notlarText = '7 inch';
-                    } else if (inchValue >= 9) {
-                        notlarText = '9 inch';
-                    }
-                }
-                tdNotlar.textContent = notlarText;
-                tr.appendChild(tdNotlar);
-                
-                resultsBody.appendChild(tr);
-            });
-            
-            results.style.display = 'block';
-            
-            // Animasyon efekti için
-            results.style.opacity = '0';
-            results.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                results.style.opacity = '1';
-                results.style.transform = 'translateY(0)';
-            }, 10);
-        }
-
-        // Google Drive WebView işlemleri
         document.getElementById('driveIcon').addEventListener('click', function() {
             const webviewContainer = document.getElementById('webviewContainer');
             const driveFrame = document.getElementById('driveFrame');
