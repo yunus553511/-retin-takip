@@ -307,18 +307,22 @@
             }
             
             th, td {
-                padding: 6px 4px;
-                font-size: 12px;
+                padding: 4px 2px;
+                font-size: 11px;
                 white-space: nowrap;
             }
             
             .results {
-                padding: 10px;
-                max-width: 95%;
+                padding: 8px 5px;
+                max-width: 98%;
+                margin-left: auto;
+                margin-right: auto;
             }
             
             table {
-                font-size: 12px;
+                font-size: 11px;
+                width: 100%;
+                table-layout: fixed;
             }
             
             /* Tablo için yatay kaydırma */
@@ -327,60 +331,97 @@
                 -webkit-overflow-scrolling: touch;
             }
             
+            /* Sütun genişliklerini ayarlama */
+            th, td {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
             /* Tarih sütununu sabit genişlikte tutma */
             th:first-child, td:first-child {
-                min-width: 80px;
-                max-width: 80px;
+                min-width: 60px;
+                max-width: 60px;
+                width: 60px;
             }
             
             /* Profil kodu sütununu sabit genişlikte tutma */
             th:nth-child(2), td:nth-child(2) {
-                min-width: 90px;
-                max-width: 90px;
+                min-width: 70px;
+                max-width: 70px;
+                width: 70px;
             }
             
             /* Diğer sütunları daha kompakt hale getirme */
-            th:not(:first-child):not(:nth-child(2)), 
-            td:not(:first-child):not(:nth-child(2)) {
-                min-width: 70px;
+            th:nth-child(3), td:nth-child(3),
+            th:nth-child(4), td:nth-child(4),
+            th:nth-child(5), td:nth-child(5),
+            th:nth-child(6), td:nth-child(6),
+            th:nth-child(7), td:nth-child(7),
+            th:nth-child(8), td:nth-child(8) {
+                min-width: 50px;
+                max-width: 50px;
+                width: 50px;
             }
         }
         
         /* Daha küçük mobil cihazlar için ek düzenlemeler */
         @media (max-width: 480px) {
+            body {
+                padding: 10px 5px;
+            }
+            
             th, td {
-                padding: 5px 3px;
-                font-size: 11px;
+                padding: 3px 2px;
+                font-size: 10px;
             }
             
             h1 {
                 font-size: 20px;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
             
             .search-box {
-                padding: 12px;
+                padding: 10px;
+                max-width: 95%;
             }
             
             input[type="text"], button {
-                font-size: 13px;
+                font-size: 12px;
                 padding: 8px;
+            }
+            
+            .results {
+                padding: 5px 3px;
+                max-width: 99%;
             }
             
             /* Daha kompakt tablo */
             th:first-child, td:first-child {
-                min-width: 70px;
-                max-width: 70px;
+                min-width: 55px;
+                max-width: 55px;
+                width: 55px;
             }
             
             th:nth-child(2), td:nth-child(2) {
-                min-width: 80px;
-                max-width: 80px;
+                min-width: 65px;
+                max-width: 65px;
+                width: 65px;
             }
             
-            th:not(:first-child):not(:nth-child(2)), 
-            td:not(:first-child):not(:nth-child(2)) {
-                min-width: 60px;
+            th:nth-child(3), td:nth-child(3),
+            th:nth-child(4), td:nth-child(4),
+            th:nth-child(5), td:nth-child(5),
+            th:nth-child(6), td:nth-child(6),
+            th:nth-child(7), td:nth-child(7),
+            th:nth-child(8), td:nth-child(8) {
+                min-width: 45px;
+                max-width: 45px;
+                width: 45px;
+            }
+            
+            /* Tablo başlıklarının boyutunu küçültme */
+            th {
+                font-size: 9px;
             }
         }
     </style>
