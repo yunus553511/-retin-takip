@@ -384,13 +384,12 @@
             }
             
             /* PC için tooltip'i mobilde gizle */
-            tr:hover .tooltip,
-            tr:active .tooltip {
-                display: none;
+            .tooltip {
+                display: none !important;
             }
             
-            /* Mobil için uzun basılı tutma tooltip'i */
-            .tooltip-touch {
+            /* Mobil için popup stilleri */
+            .data-popup {
                 display: none;
                 position: fixed;
                 top: 50%;
@@ -770,6 +769,7 @@
                 closeButton.addEventListener('click', function(e) {
                     dataPopup.style.display = 'none';
                     document.removeEventListener('click', closePopupOutside);
+                    document.removeEventListener('touchstart', closePopupOutside);
                     e.stopPropagation(); // Tıklamanın yayılmasını durdur
                 });
                 dataPopup.appendChild(closeButton);
@@ -885,9 +885,18 @@
                 // Popup içeriğini popup'a ekle
                 dataPopup.appendChild(popupContent);
                 
-                // Satıra tıklama olayı ekle
-                tr.onclick = function() {
-                    console.log('Satıra tıklandı, popup açılıyor:', i);
+                // Dışarıya tıklama ile kapatma fonksiyonu
+                function closePopupOutside(e) {
+                    if (!dataPopup.contains(e.target) && e.target !== tr) {
+                        dataPopup.style.display = 'none';
+                        document.removeEventListener('click', closePopupOutside);
+                        document.removeEventListener('touchstart', closePopupOutside);
+                    }
+                }
+                
+                // Hem click hem de touchstart olaylarını ekle
+                function showPopup() {
+                    console.log('Popup açılıyor:', i);
                     
                     // Tüm popup'ları gizle
                     popups.forEach(p => p.style.display = 'none');
@@ -896,17 +905,18 @@
                     dataPopup.style.display = 'block';
                     
                     // Dışarıya tıklama ile kapatma olayını ekle
-                    function closePopupOutside(e) {
-                        if (!dataPopup.contains(e.target) && e.target !== tr) {
-                            dataPopup.style.display = 'none';
-                            document.removeEventListener('click', closePopupOutside);
-                        }
-                    }
-                    
-                    // Bir sonraki tıklamada çalışması için timeout ekle
                     setTimeout(() => {
                         document.addEventListener('click', closePopupOutside);
+                        document.addEventListener('touchstart', closePopupOutside);
                     }, 10);
+                }
+                
+                // Tıklama olayı ekle (hem PC hem mobil için)
+                tr.onclick = showPopup;
+                tr.ontouchstart = function(e) {
+                    // touchstart olayını da ekle ama preventDefault yapma
+                    // böylece hem tıklama hem dokunma çalışır
+                    e.stopPropagation();
                 };
                 
                 resultsBody.appendChild(tr);
@@ -954,6 +964,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Tıklama olaylarını test et
             console.log('Sayfa yüklendi, tıklama olayları hazır');
+            
+            // Mobil cihazlarda çift dokunma yakınlaştırmasını engelle
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         });
     </script>
 </body>
