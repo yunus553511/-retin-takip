@@ -309,17 +309,16 @@
             th, td {
                 padding: 6px 8px;
                 font-size: 12px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-width: 120px;
+                overflow: visible; /* Tarih metnini göster */
+                white-space: normal; /* Metni sarabilir */
+                word-break: break-word; /* Uzun kelimeleri bölebilir */
             }
             
             th {
                 font-size: 11px;
             }
             
-            /* Tablo başlıklarını daha iyi görünür yap */
+            /* Tablo başlıklarının görünümünü iyileştir */
             thead th {
                 position: sticky;
                 top: 0;
@@ -333,21 +332,28 @@
                 -webkit-overflow-scrolling: touch;
             }
             
-            /* Minimum sütun genişliği ayarla */
+            /* Minimum sütun genişliğini ayarla */
             table {
                 table-layout: fixed;
                 width: 100%;
             }
             
-            /* Notlar sütununu için daha fazla alan ayır */
+            /* Tarih sütunu için daha fazla alan ayır */
+            td:first-child, th:first-child {
+                min-width: 90px; /* Tarih sütunu için daha fazla alan */
+                max-width: 90px;
+                white-space: nowrap; /* Tarihi tek satırda tut */
+            }
+            
+            /* Notlar sütunu için daha fazla alan ayır */
             td:last-child, th:last-child {
                 min-width: 150px;
                 max-width: 200px;
-                white-space: normal;
+                white-space: normal; /* Notlar sütununda metni sarabilir */
                 word-break: break-word;
             }
             
-            /* Diğer sütunları için */
+            /* Diğer sütunlar için */
             td, th {
                 min-width: 80px;
             }
@@ -448,7 +454,7 @@
     
     <div class="metal-border">
         <div class="results" id="results">
-            <div id="successMessage" style="color: #39ff14; text-align: center; margin-bottom: 15px; display: none;">KULLANMAYA BAŞLAYABİLİRSİNİZ, İYİ ÇALIŞMALAR.</div>
+            <div id="successMessage" style="color: #39ff14; text-align: center; margin-bottom: 15px; display: none;">Excel dosyası indi, arama yapabilirsiniz.</div>
             <table id="resultsTable">
                 <thead>
                     <tr>
@@ -527,6 +533,7 @@
                     }
                     
                     loading.style.display = 'none';
+                    successMessage.style.display = 'block'; // Excel dosyası indiğinde mesajı göster
                     console.log('Excel verisi yüklendi');
                 })
                 .catch(error => {
@@ -555,7 +562,6 @@
                 displayResults(searchResults);
                 loading.style.display = 'none';
                 if (searchResults.length > 0) {
-                    successMessage.style.display = 'block'; // Mesajı göster
                     results.style.display = 'block';
                 }
             }, 500);
