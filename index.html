@@ -374,10 +374,7 @@
             
             /* Diğer sütunlar için */
             td:nth-child(n+3):not(:last-child), th:nth-child(n+3):not(:last-child) {
-                min-width: 75px;
-                max-width: 75px;
-                text-align: center;
-                white-space: nowrap; /* Sayısal değerler tek satırda */
+                display: none; /* 3. sütundan itibaren son sütun hariç tüm sütunları gizle */
             }
             
             /* Satırlara hover efekti */
@@ -442,47 +439,75 @@
         @media (min-width: 769px) {
             tr {
                 position: relative;
+                cursor: pointer;
             }
             
-            tr .tooltip {
+            /* PC'de de aynı popup stilini kullan */
+            .data-popup {
                 display: none;
-                position: absolute;
-                top: -100px;
+                position: fixed;
+                top: 50%;
                 left: 50%;
-                transform: translateX(-50%);
-                background-color: rgba(0, 0, 0, 0.9);
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.95);
                 color: #39ff14;
                 border: 2px solid #39ff14;
                 border-radius: 8px;
-                padding: 12px;
-                z-index: 100;
-                width: 300px;
+                padding: 15px;
+                z-index: 1000;
+                width: 90%;
+                max-width: 400px;
                 box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
                 text-align: left;
                 font-size: 14px;
+                line-height: 1.6;
                 backdrop-filter: blur(5px);
                 animation: glow 1.5s infinite alternate;
             }
             
-            /* Tooltip üçgen oku */
-            tr .tooltip:after {
-                content: '';
+            /* Popup içeriği için tablo stili */
+            .popup-content {
+                display: table;
+                width: 100%;
+            }
+            
+            .popup-row {
+                display: table-row;
+            }
+            
+            .popup-label {
+                display: table-cell;
+                font-weight: bold;
+                padding-right: 10px;
+                padding-bottom: 8px;
+                min-width: 140px;
+            }
+            
+            .popup-value {
+                display: table-cell;
+                padding-bottom: 8px;
+            }
+            
+            /* Popup kapatma düğmesi */
+            .popup-close {
                 position: absolute;
-                bottom: -10px;
-                left: 50%;
-                transform: translateX(-50%);
-                border-width: 10px 10px 0;
-                border-style: solid;
-                border-color: #39ff14 transparent transparent transparent;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                background-color: transparent;
+                border: none;
+                color: #39ff14;
+                font-size: 20px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
             }
             
-            tr:hover .tooltip {
-                display: block;
-            }
-            
-            /* PC'de uzun basılı tutma tooltipini gösterme */
-            tr .tooltip-touch {
-                display: none;
+            .popup-close:before {
+                content: '\00D7'; /* × işareti */
             }
         }
         
@@ -668,7 +693,11 @@
                 return;
             }
             
-            searchResults.forEach(row => {
+            // Önceki popup'ları temizle
+            const oldPopups = document.querySelectorAll('.data-popup');
+            oldPopups.forEach(popup => popup.remove());
+            
+            searchResults.forEach((row, i) => {
                 const tr = document.createElement('tr');
                 
                 // TARİH
@@ -722,158 +751,158 @@
                 tdNotlar.textContent = notlarText;
                 tr.appendChild(tdNotlar);
                 
-                // Tooltip-touch div'i oluştur (mobil için uzun basılı tutma)
-                const tooltipTouch = document.createElement('div');
-                tooltipTouch.className = 'tooltip-touch';
+                // Popup div'i oluştur
+                const dataPopup = document.createElement('div');
+                dataPopup.className = 'data-popup';
+                dataPopup.id = `popup-${i}`; // Benzersiz ID
                 
-                // Tooltip içeriğini tablo formatında oluştur
-                const tooltipContent = document.createElement('div');
-                tooltipContent.className = 'tooltip-content';
+                // Kapatma düğmesi ekle
+                const closeButton = document.createElement('button');
+                closeButton.className = 'popup-close';
+                closeButton.addEventListener('click', function(e) {
+                    dataPopup.style.display = 'none';
+                    document.removeEventListener('click', closePopupOutside);
+                    e.stopPropagation(); // Tıklamanın yayılmasını durdur
+                });
+                dataPopup.appendChild(closeButton);
+                
+                // Popup içeriğini tablo formatında oluştur
+                const popupContent = document.createElement('div');
+                popupContent.className = 'popup-content';
                 
                 // Tarih satırı
                 const rowTarih = document.createElement('div');
-                rowTarih.className = 'tooltip-row';
+                rowTarih.className = 'popup-row';
                 const labelTarih = document.createElement('div');
-                labelTarih.className = 'tooltip-label';
+                labelTarih.className = 'popup-label';
                 labelTarih.textContent = 'Tarih:';
                 const valueTarih = document.createElement('div');
-                valueTarih.className = 'tooltip-value';
+                valueTarih.className = 'popup-value';
                 valueTarih.textContent = formatExcelDate(row[0]) || '-';
                 rowTarih.appendChild(labelTarih);
                 rowTarih.appendChild(valueTarih);
-                tooltipContent.appendChild(rowTarih);
+                popupContent.appendChild(rowTarih);
                 
                 // Profil Kodu satırı
                 const rowKod = document.createElement('div');
-                rowKod.className = 'tooltip-row';
+                rowKod.className = 'popup-row';
                 const labelKod = document.createElement('div');
-                labelKod.className = 'tooltip-label';
+                labelKod.className = 'popup-label';
                 labelKod.textContent = 'Profil Kodu:';
                 const valueKod = document.createElement('div');
-                valueKod.className = 'tooltip-value';
+                valueKod.className = 'popup-value';
                 valueKod.textContent = row[1] || '-';
                 rowKod.appendChild(labelKod);
                 rowKod.appendChild(valueKod);
-                tooltipContent.appendChild(rowKod);
+                popupContent.appendChild(rowKod);
                 
                 // Metal Kalınlığı satırı
                 const rowKalinlik = document.createElement('div');
-                rowKalinlik.className = 'tooltip-row';
+                rowKalinlik.className = 'popup-row';
                 const labelKalinlik = document.createElement('div');
-                labelKalinlik.className = 'tooltip-label';
+                labelKalinlik.className = 'popup-label';
                 labelKalinlik.textContent = 'Metal Kalınlığı:';
                 const valueKalinlik = document.createElement('div');
-                valueKalinlik.className = 'tooltip-value';
+                valueKalinlik.className = 'popup-value';
                 valueKalinlik.textContent = (row[2] ? row[2] + ' mm' : '-');
                 rowKalinlik.appendChild(labelKalinlik);
                 rowKalinlik.appendChild(valueKalinlik);
-                tooltipContent.appendChild(rowKalinlik);
+                popupContent.appendChild(rowKalinlik);
                 
                 // Sipariş Boyu satırı
                 const rowBoy = document.createElement('div');
-                rowBoy.className = 'tooltip-row';
+                rowBoy.className = 'popup-row';
                 const labelBoy = document.createElement('div');
-                labelBoy.className = 'tooltip-label';
+                labelBoy.className = 'popup-label';
                 labelBoy.textContent = 'Sipariş Boyu:';
                 const valueBoy = document.createElement('div');
-                valueBoy.className = 'tooltip-value';
+                valueBoy.className = 'popup-value';
                 valueBoy.textContent = (row[3] ? row[3] + ' mm' : '-');
                 rowBoy.appendChild(labelBoy);
                 rowBoy.appendChild(valueBoy);
-                tooltipContent.appendChild(rowBoy);
+                popupContent.appendChild(rowBoy);
                 
                 // Üretim Miktarı satırı
                 const rowUretim = document.createElement('div');
-                rowUretim.className = 'tooltip-row';
+                rowUretim.className = 'popup-row';
                 const labelUretim = document.createElement('div');
-                labelUretim.className = 'tooltip-label';
+                labelUretim.className = 'popup-label';
                 labelUretim.textContent = 'Üretim Miktarı:';
                 const valueUretim = document.createElement('div');
-                valueUretim.className = 'tooltip-value';
+                valueUretim.className = 'popup-value';
                 valueUretim.textContent = row[4] || '-';
                 rowUretim.appendChild(labelUretim);
                 rowUretim.appendChild(valueUretim);
-                tooltipContent.appendChild(rowUretim);
+                popupContent.appendChild(rowUretim);
                 
                 // Profil Hızı satırı
                 const rowHiz = document.createElement('div');
-                rowHiz.className = 'tooltip-row';
+                rowHiz.className = 'popup-row';
                 const labelHiz = document.createElement('div');
-                labelHiz.className = 'tooltip-label';
+                labelHiz.className = 'popup-label';
                 labelHiz.textContent = 'Profil Hızı:';
                 const valueHiz = document.createElement('div');
-                valueHiz.className = 'tooltip-value';
+                valueHiz.className = 'popup-value';
                 valueHiz.textContent = row[5] || '-';
                 rowHiz.appendChild(labelHiz);
                 rowHiz.appendChild(valueHiz);
-                tooltipContent.appendChild(rowHiz);
+                popupContent.appendChild(rowHiz);
                 
                 // Sortiden Alınan Miktar satırı
                 const rowSorti = document.createElement('div');
-                rowSorti.className = 'tooltip-row';
+                rowSorti.className = 'popup-row';
                 const labelSorti = document.createElement('div');
-                labelSorti.className = 'tooltip-label';
+                labelSorti.className = 'popup-label';
                 labelSorti.textContent = 'Sortiden Alınan:';
                 const valueSorti = document.createElement('div');
-                valueSorti.className = 'tooltip-value';
+                valueSorti.className = 'popup-value';
                 valueSorti.textContent = row[6] || '-';
                 rowSorti.appendChild(labelSorti);
                 rowSorti.appendChild(valueSorti);
-                tooltipContent.appendChild(rowSorti);
+                popupContent.appendChild(rowSorti);
                 
                 // Notlar satırı
                 const rowNotlar = document.createElement('div');
-                rowNotlar.className = 'tooltip-row';
+                rowNotlar.className = 'popup-row';
                 const labelNotlar = document.createElement('div');
-                labelNotlar.className = 'tooltip-label';
+                labelNotlar.className = 'popup-label';
                 labelNotlar.textContent = 'Notlar:';
                 const valueNotlar = document.createElement('div');
-                valueNotlar.className = 'tooltip-value';
+                valueNotlar.className = 'popup-value';
                 valueNotlar.textContent = row[12] || '-';
                 rowNotlar.appendChild(labelNotlar);
                 rowNotlar.appendChild(valueNotlar);
-                tooltipContent.appendChild(rowNotlar);
+                popupContent.appendChild(rowNotlar);
                 
-                // Tooltip içeriğini tooltip'e ekle
-                tooltipTouch.appendChild(tooltipContent);
-                document.body.appendChild(tooltipTouch); // Body'ye ekle (pozisyon için)
+                // Popup içeriğini popup'a ekle
+                dataPopup.appendChild(popupContent);
+                document.body.appendChild(dataPopup); // Body'ye ekle (pozisyon için)
                 
-                // Mobil için uzun basılı tutma olayını ekle
-                let touchStartTime = 0;
-                let touchTimeout = null;
-                let activeTooltip = null;
-                
-                tr.addEventListener('touchstart', function(e) {
-                    touchStartTime = new Date().getTime();
-                    const currentRow = this;
+                // Satıra tıklama olayı ekle
+                tr.addEventListener('click', function(event) {
+                    // Tüm popup'ları gizle
+                    const allPopups = document.querySelectorAll('.data-popup');
+                    allPopups.forEach(p => p.style.display = 'none');
                     
-                    touchTimeout = setTimeout(() => {
-                        // Tüm tooltip'leri gizle
-                        const allTooltips = document.querySelectorAll('.tooltip-touch');
-                        allTooltips.forEach(t => t.style.display = 'none');
-                        
-                        // Tooltip'i göster
-                        tooltipTouch.style.display = 'block';
-                        activeTooltip = tooltipTouch;
-                        
-                        // Arka plan kapatma olayını ekle
-                        document.addEventListener('touchstart', closeTooltip);
-                    }, 500); // 500ms uzun basılı tutma süresi
+                    // Bu satırın popup'unu göster
+                    dataPopup.style.display = 'block';
+                    
+                    // Dışarıya tıklama ile kapatma olayını ekle
+                    setTimeout(() => {
+                        document.addEventListener('click', closePopupOutside);
+                    }, 10);
+                    
+                    // Olayın yayılmasını durdur
+                    event.stopPropagation();
                 });
                 
-                tr.addEventListener('touchend', function() {
-                    const touchEndTime = new Date().getTime();
-                    const touchDuration = touchEndTime - touchStartTime;
-                    
-                    // Eğer dokunma süresi 500ms'den kısaysa normal tıklama olarak kabul et
-                    if (touchDuration < 500) {
-                        clearTimeout(touchTimeout);
+                // Popup dışına tıklama ile kapatma fonksiyonu
+                function closePopupOutside(e) {
+                    if (!dataPopup.contains(e.target) && e.target !== tr) {
+                        dataPopup.style.display = 'none';
+                        document.removeEventListener('click', closePopupOutside);
                     }
-                });
-                
-                tr.addEventListener('touchmove', function() {
-                    clearTimeout(touchTimeout);
-                });
+                }
                 
                 resultsBody.appendChild(tr);
             });
