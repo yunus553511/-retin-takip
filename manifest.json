@@ -1,0 +1,21 @@
+{
+  "name": "Extru00fczyon Kalu0131p Arama",
+  "short_name": "Kalu0131p Arama",
+  "description": "Extru00fczyon kalu0131p profil kodlaru0131nu0131 arama uygulamasu0131",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#39ff14",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,258 @@
+/* Temel Renkler ve Değişkenler */
+:root {
+    --neon-green: #39ff14;
+    --neon-blue: #14f0ff;
+    --neon-purple: #b700ff;
+    --dark-bg: #121212;
+    --darker-bg: #0a0a0a;
+    --text-color: #ffffff;
+}
+
+/* Temel Stiller */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--dark-bg);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.7);
+    letter-spacing: 2px;
+}
+
+.highlight {
+    color: var(--neon-green);
+    font-weight: bold;
+    display: inline-block;
+}
+
+/* Search Container */
+.search-container {
+    margin-bottom: 30px;
+    position: static;
+}
+
+.search-box {
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+    position: relative;
+}
+
+.search-box label {
+    display: block;
+    margin-bottom: 10px;
+    font-family: 'Orbitron', sans-serif;
+    color: var(--neon-green);
+    font-size: 1.2rem;
+}
+
+.input-group {
+    display: flex;
+    width: 100%;
+    position: static;
+}
+
+#kalipNo {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 5px 0 0 5px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    position: static;
+}
+
+#kalipNo:focus {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+}
+
+.search-box button {
+    padding: 15px 25px;
+    background: linear-gradient(to right, rgba(57, 255, 20, 0.7), rgba(57, 255, 20, 0.9));
+    border: none;
+    border-radius: 0 5px 5px 0;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    position: static;
+}
+
+.search-box button:hover {
+    background: linear-gradient(to right, rgba(57, 255, 20, 0.9), rgba(57, 255, 20, 1));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.search-box button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Yükleniyor Göstergesi */
+.loading, .download-status {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    border-radius: 5px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(57, 255, 20, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid var(--neon-green);
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Sonuç Tablosu */
+.results-container {
+    display: none;
+    margin-top: 30px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+}
+
+.results-container h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--neon-green);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(57, 255, 20, 0.3);
+}
+
+table th {
+    background-color: rgba(57, 255, 20, 0.1);
+    color: var(--neon-green);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 500;
+}
+
+table tr:hover {
+    background-color: rgba(57, 255, 20, 0.05);
+}
+
+.highlight-cell {
+    color: var(--neon-green);
+    font-weight: bold;
+}
+
+/* Sonuç Bulunamadı */
+.no-results {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 30px 0;
+    padding: 30px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    border-radius: 5px;
+    text-align: center;
+}
+
+.no-results i {
+    font-size: 3rem;
+    color: var(--neon-green);
+    margin-bottom: 15px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    border-top: 1px solid rgba(57, 255, 20, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .search-box {
+        padding: 15px;
+    }
+    
+    .search-box label {
+        font-size: 1rem;
+    }
+    
+    #kalipNo {
+        padding: 12px;
+    }
+    
+    .search-box button {
+        padding: 12px 20px;
+    }
+    
+    table th, table td {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+}
