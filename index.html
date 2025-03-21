@@ -307,19 +307,21 @@
             }
             
             th, td {
-                padding: 6px 8px;
-                font-size: 12px;
+                padding: 4px 6px;
+                font-size: 11px;
                 overflow: visible; /* Tarih metnini göster */
-                white-space: normal; /* Metni sarabilir */
-                word-break: break-word; /* Uzun kelimeleri bölebilir */
+                white-space: nowrap; /* Metni tek satırda tut */
+                text-overflow: ellipsis; /* Tarih metnini ... ile göster */
                 position: relative; /* Tooltip için gerekli */
+                max-width: 120px; /* Maksimum genişlik */
             }
             
             th {
-                font-size: 11px;
+                font-size: 10px;
                 white-space: normal; /* Başlıklarda kelimeler alta inebilir */
                 word-break: break-word;
                 hyphens: auto;
+                padding: 4px 2px;
             }
             
             /* Tablo başlıklarının görünümünü iyileştir */
@@ -340,14 +342,14 @@
             table {
                 table-layout: fixed;
                 width: 100%;
-                border-spacing: 5px; /* Hücreler arasında boşluk */
+                border-spacing: 1px; /* Hücreler arasında boşluk */
                 border-collapse: separate;
             }
             
             /* Tarih sütunu için daha fazla alan ayır */
             td:first-child, th:first-child {
-                min-width: 90px; /* Tarih sütunu için daha fazla alan */
-                max-width: 90px;
+                min-width: 85px; /* Tarih sütunu için daha fazla alan */
+                max-width: 85px;
                 white-space: nowrap; /* Tarihi tek satırda tut */
             }
             
@@ -356,20 +358,20 @@
                 min-width: 80px; /* Profil kodu sütunu için alan */
                 max-width: 80px;
                 white-space: nowrap; /* Profil kodunu tek satırda tut */
-                padding-left: 15px; /* Sol taraftan daha fazla boşluk */
+                padding-left: 8px; /* Sol taraftan daha fazla boşluk */
             }
             
             /* Notlar sütunu için daha fazla alan ayır */
             td:last-child, th:last-child {
-                min-width: 150px;
-                max-width: 200px;
+                min-width: 120px;
+                max-width: 150px;
                 white-space: normal; /* Notlar sütununda metni sarabilir */
                 word-break: break-word;
             }
             
             /* Diğer sütunlar için */
             td, th {
-                min-width: 80px;
+                min-width: 60px;
             }
             
             /* Tooltip stili - mobil için */
@@ -381,34 +383,23 @@
             /* Uzun basılı tutma için tooltip */
             tr .tooltip-touch {
                 display: none;
-                position: absolute;
-                top: -120px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: rgba(0, 0, 0, 0.9);
+                position: fixed; /* Sabit pozisyon */
+                top: 50%; /* Ekranın ortası */
+                left: 50%; /* Ekranın ortası */
+                transform: translate(-50%, -50%); /* Tam ortalamaya */
+                background-color: rgba(0, 0, 0, 0.95);
                 color: #39ff14;
                 border: 2px solid #39ff14;
                 border-radius: 8px;
-                padding: 15px;
-                z-index: 100;
-                width: 250px;
+                padding: 12px;
+                z-index: 1000; /* En üst katman */
+                width: 80%; /* Ekran genişliğinin %80'i */
+                max-width: 300px;
                 box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
                 text-align: left;
-                font-size: 14px;
+                font-size: 13px;
                 backdrop-filter: blur(5px);
                 animation: glow 1.5s infinite alternate;
-            }
-            
-            /* Tooltip üçgen oku */
-            tr .tooltip-touch:after {
-                content: '';
-                position: absolute;
-                bottom: -10px;
-                left: 50%;
-                transform: translateX(-50%);
-                border-width: 10px 10px 0;
-                border-style: solid;
-                border-color: #39ff14 transparent transparent transparent;
             }
         }
         
@@ -725,18 +716,23 @@
                 // Mobil için uzun basılı tutma olayını ekle
                 tr.addEventListener('touchstart', function(e) {
                     this.touchTimeout = setTimeout(() => {
+                        // Tüm tooltip'leri gizle
                         const tooltips = document.querySelectorAll('.tooltip-touch');
                         tooltips.forEach(t => t.style.display = 'none');
-                        this.querySelector('.tooltip-touch').style.display = 'block';
+                        
+                        // Bu satırın tooltip'ini göster
+                        const tooltip = this.querySelector('.tooltip-touch');
+                        if (tooltip) {
+                            tooltip.style.display = 'block';
+                            
+                            // Arka plan kapatma olayını ekle
+                            document.addEventListener('touchstart', closeTooltip);
+                        }
                     }, 500);
                 });
                 
                 tr.addEventListener('touchend', function() {
                     clearTimeout(this.touchTimeout);
-                    setTimeout(() => {
-                        const tooltips = document.querySelectorAll('.tooltip-touch');
-                        tooltips.forEach(t => t.style.display = 'none');
-                    }, 1000);
                 });
                 
                 tr.addEventListener('touchmove', function() {
@@ -773,6 +769,16 @@
             webviewContainer.style.display = 'none';
             driveFrame.src = '';
         });
+        
+        // Tooltip'i kapatmak için fonksiyon
+        function closeTooltip(e) {
+            // Tıklanan eleman tooltip içinde değilse kapat
+            if (!e.target.closest('.tooltip-touch')) {
+                const tooltips = document.querySelectorAll('.tooltip-touch');
+                tooltips.forEach(t => t.style.display = 'none');
+                document.removeEventListener('touchstart', closeTooltip);
+            }
+        }
     </script>
 </body>
 </html>
