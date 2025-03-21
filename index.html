@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beymetal Üretim Takip</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-green-glow: rgba(57, 255, 20, 0.5);
+            --dark-bg: #000000;
+            --darker-bg: #111111;
+            --metal-gray: #333333;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23000000" /><path d="M0 0L200 200M200 0L0 200" stroke="%23222222" stroke-width="1" /></svg>');
+            background-attachment: fixed;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-green);
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px var(--neon-green-glow), 0 0 20px var(--neon-green-glow);
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { text-shadow: 0 0 10px var(--neon-green-glow), 0 0 20px var(--neon-green-glow); }
+            50% { text-shadow: 0 0 15px var(--neon-green-glow), 0 0 30px var(--neon-green-glow); }
+            100% { text-shadow: 0 0 10px var(--neon-green-glow), 0 0 20px var(--neon-green-glow); }
+        }
+        
+        .search-box {
+            background-color: var(--darker-bg);
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+        
+        .search-box label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--neon-green);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--neon-green);
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            box-shadow: 0 0 15px var(--neon-green-glow);
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--neon-green), #2bbd0e);
+            color: #000000;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(57, 255, 20, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .results {
+            width: 100%;
+            max-width: 1000px;
+            background-color: rgba(17, 17, 17, 0.8);
+            border: 1px solid var(--neon-green);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            overflow-x: auto;
+            box-shadow: 0 0 15px var(--neon-green-glow);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        th {
+            background-color: rgba(57, 255, 20, 0.2);
+            color: var(--neon-green);
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--neon-green);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(57, 255, 20, 0.3);
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        
+        tr {
+            transition: all 0.3s ease;
+        }
+        
+        tr:hover {
+            background-color: rgba(57, 255, 20, 0.1);
+            transform: scale(1.01);
+        }
+        
+        .loading {
+            display: none;
+            color: var(--neon-green);
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+            100% { content: '.'; }
+        }
+        
+        .no-results {
+            display: none;
+            color: var(--neon-green);
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 5px var(--neon-green-glow);
+        }
+        
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666666;
+            font-size: 14px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        /* Metal doku efekti */
+        .metal-border {
+            position: relative;
+            padding: 1px;
+            background: linear-gradient(135deg, #333, #555, #333);
+            border-radius: 10px;
+        }
+        
+        .metal-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(0,0,0,0.2));
+            pointer-events: none;
+            border-radius: 10px;
+        }
+        
+        /* Google Drive WebView */
+        .drive-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .drive-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .webview-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .webview-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .close-webview {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--neon-green);
+            color: black;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                padding: 15px;
+                max-width: 90%;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            input[type="text"], button {
+                font-size: 14px;
+                padding: 10px;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+            
+            .results {
+                padding: 10px;
+                max-width: 95%;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            /* Tablo için yatay kaydırma */
+            .results {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Tarih sütununu sabit genişlikte tutma */
+            th:first-child, td:first-child {
+                min-width: 80px;
+                max-width: 80px;
+            }
+            
+            /* Profil kodu sütununu sabit genişlikte tutma */
+            th:nth-child(2), td:nth-child(2) {
+                min-width: 90px;
+                max-width: 90px;
+            }
+            
+            /* Diğer sütunları daha kompakt hale getirme */
+            th:not(:first-child):not(:nth-child(2)), 
+            td:not(:first-child):not(:nth-child(2)) {
+                min-width: 70px;
+            }
+        }
+        
+        /* Daha küçük mobil cihazlar için ek düzenlemeler */
+        @media (max-width: 480px) {
+            th, td {
+                padding: 5px 3px;
+                font-size: 11px;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .search-box {
+                padding: 12px;
+            }
+            
+            input[type="text"], button {
+                font-size: 13px;
+                padding: 8px;
+            }
+            
+            /* Daha kompakt tablo */
+            th:first-child, td:first-child {
+                min-width: 70px;
+                max-width: 70px;
+            }
+            
+            th:nth-child(2), td:nth-child(2) {
+                min-width: 80px;
+                max-width: 80px;
+            }
+            
+            th:not(:first-child):not(:nth-child(2)), 
+            td:not(:first-child):not(:nth-child(2)) {
+                min-width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>BEYMETAL ÜRETİM TAKİP</h1>
+    
+    <div class="metal-border">
+        <div class="search-box">
+            <label for="kalipNo">Profil Kodu:</label>
+            <input type="text" id="kalipNo" placeholder="Profil kodunu girin...">
+            <button id="searchButton">ARA</button>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">
+        YÜKLENİYOR
+    </div>
+    
+    <div class="no-results" id="noResults">
+        SONUÇ BULUNAMADI.
+    </div>
+    
+    <div class="metal-border">
+        <div class="results" id="results">
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>TARİH</th>
+                        <th>PROFİL KODU</th>
+                        <th>1 METRELİK PROFİL AĞIRLIĞI</th>
+                        <th>SİPARİŞ BOYU</th>
+                        <th>ÜRETİLEN PROFİL MİKTARI</th>
+                        <th>PRES HIZI</th>
+                        <th>SORTİDEN ALINAN PROFİL MİKTARI</th>
+                        <th>NOTLAR</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <footer>
+        BEYMETAL &copy; 2025 | EKSTÜZYON KALIP TAKİP SİSTEMİ
+    </footer>
+
+    <img src="https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png" class="drive-icon" id="driveIcon" title="Google Drive'ı Aç">
+
+    <div class="webview-container" id="webviewContainer">
+        <div class="webview-content">
+            <button class="close-webview" id="closeWebview">×</button>
+            <iframe id="driveFrame" src=""></iframe>
+        </div>
+    </div>
+    
+    <script>
+        // Excel dosyası URL'i
+        const EXCEL_URL = 'https://docs.google.com/spreadsheets/d/1VfNZtHNrDuECCMaJiIlXXOD4MGIQcyuq/export?format=xlsx&gid=237221860';
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const searchButton = document.getElementById('searchButton');
+        const kalipNo = document.getElementById('kalipNo');
+        const noResults = document.getElementById('noResults');
+        
+        let excelData = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loading.style.display = 'block';
+            downloadExcel();
+        });
+        
+        searchButton.addEventListener('click', performSearch);
+        
+        kalipNo.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // Excel dosyasını indir ve işle
+        function downloadExcel() {
+            fetch(EXCEL_URL)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Excel dosyası indirilemedi');
+                    }
+                    return response.arrayBuffer();
+                })
+                .then(data => {
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    
+                    // Başlık satırını kaldır
+                    if (excelData.length > 0) {
+                        excelData.shift();
+                    }
+                    
+                    loading.style.display = 'none';
+                    console.log('Excel verisi yüklendi');
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    loading.style.display = 'none';
+                    alert('Excel dosyası yüklürken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+                });
+        }
+        
+        // Arama fonksiyonu
+        function performSearch() {
+            const searchTerm = kalipNo.value.trim().toUpperCase();
+            
+            if (searchTerm === '') {
+                alert('Lütfen bir profil kodu girin');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            noResults.style.display = 'none';
+            
+            setTimeout(() => {
+                const searchResults = searchExcelData(searchTerm);
+                displayResults(searchResults);
+                loading.style.display = 'none';
+            }, 500);
+        }
+        
+        // Excel verisinde arama yap
+        function searchExcelData(searchTerm) {
+            if (!excelData || excelData.length === 0) {
+                return [];
+            }
+            
+            return excelData.filter(row => {
+                if (!row || row.length < 2) return false;
+                
+                const profilKoduCell = String(row[1] || '').toUpperCase();
+                return profilKoduCell.includes(searchTerm);
+            });
+        }
+        
+        // Excel tarihini normal tarihe çevir
+        function formatExcelDate(excelDate) {
+            if (!excelDate) return '';
+            
+            // Excel tarihi (1 Ocak 1900'den itibaren geçen gün sayısı)
+            const date = new Date((excelDate - 25569) * 86400 * 1000);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            
+            return `${day}.${month}.${year}`;
+        }
+        
+        // Sonuçları göster
+        function displayResults(searchResults) {
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+            
+            if (searchResults.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            searchResults.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // TARİH
+                const tdTarih = document.createElement('td');
+                tdTarih.textContent = formatExcelDate(row[0]) || '';
+                tr.appendChild(tdTarih);
+                
+                // PROFİL KODU
+                const tdKod = document.createElement('td');
+                tdKod.textContent = row[1] || '';
+                tr.appendChild(tdKod);
+                
+                // 1 METRELİK PROFİL AĞIRLIĞI
+                const tdAgirlik = document.createElement('td');
+                tdAgirlik.textContent = row[2] || '';
+                tr.appendChild(tdAgirlik);
+                
+                // SİPARİŞ BOYU
+                const tdSiparisBoy = document.createElement('td');
+                tdSiparisBoy.textContent = row[3] || '';
+                tr.appendChild(tdSiparisBoy);
+                
+                // ÜRETİLEN PROFİL MİKTARI
+                const tdUretilenMiktar = document.createElement('td');
+                tdUretilenMiktar.textContent = row[4] || '';
+                tr.appendChild(tdUretilenMiktar);
+                
+                // PRES HIZI
+                const tdPresHizi = document.createElement('td');
+                tdPresHizi.textContent = row[5] || '';
+                tr.appendChild(tdPresHizi);
+                
+                // SORTİDEN ALINAN PROFİL MİKTARI
+                const tdSortidenAlinanMiktar = document.createElement('td');
+                tdSortidenAlinanMiktar.textContent = row[6] || '';
+                tr.appendChild(tdSortidenAlinanMiktar);
+                
+                // NOTLAR (M sütunu - 12. index)
+                const tdNotlar = document.createElement('td');
+                let notlarText = row[12] || '-';
+                if (notlarText && !isNaN(notlarText)) {
+                    const inchValue = parseInt(notlarText);
+                    if (inchValue >= 5 && inchValue <= 6) {
+                        notlarText = '5 inch';
+                    } else if (inchValue >= 7 && inchValue <= 8) {
+                        notlarText = '7 inch';
+                    } else if (inchValue >= 9) {
+                        notlarText = '9 inch';
+                    }
+                }
+                tdNotlar.textContent = notlarText;
+                tr.appendChild(tdNotlar);
+                
+                resultsBody.appendChild(tr);
+            });
+            
+            results.style.display = 'block';
+            
+            // Animasyon efekti için
+            results.style.opacity = '0';
+            results.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                results.style.opacity = '1';
+                results.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        // Google Drive WebView işlemleri
+        document.getElementById('driveIcon').addEventListener('click', function() {
+            const webviewContainer = document.getElementById('webviewContainer');
+            const driveFrame = document.getElementById('driveFrame');
+            // YOUR_FOLDER_ID kısmını gerçek Drive klasör ID'si ile değiştirin
+            driveFrame.src = 'https://drive.google.com/drive/folders/YOUR_FOLDER_ID?usp=sharing';
+            webviewContainer.style.display = 'flex';
+        });
+
+        document.getElementById('closeWebview').addEventListener('click', function() {
+            const webviewContainer = document.getElementById('webviewContainer');
+            const driveFrame = document.getElementById('driveFrame');
+            webviewContainer.style.display = 'none';
+            driveFrame.src = '';
+        });
+    </script>
+</body>
+</html>
